@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import Filter from "./components/Filter";
+import Notification from "./components/Notification";
 import PersonForm from "./components/PersonForm";
 import Persons from "./components/Persons";
 import personsService from "./services/persons";
@@ -9,6 +10,8 @@ function App() {
   const [newName, setNewName] = useState("");
   const [newNumber, setNewNumber] = useState("");
   const [filterValue, setFilterValue] = useState("");
+  const [message, setMessage] = useState(null);
+  const [messageType, setMessageType] = useState("success");
 
   const handleNameChange = (event) => {
     setNewName(event.target.value);
@@ -32,6 +35,10 @@ function App() {
         personsService
           .update(personToUpdate.id, updatedPerson)
           .then((returnedPerson) => {
+            setMessage(`Edit ${newName}'s number`);
+            setTimeout(() => {
+              setMessage(null);
+            }, 5000);
             setPersons(
               persons.map((person) =>
                 person.id === personToUpdate.id ? returnedPerson : person,
@@ -48,6 +55,10 @@ function App() {
       };
 
       personsService.create(newPerson).then((returnedPerson) => {
+        setMessage(`Added ${newName}`);
+        setTimeout(() => {
+          setMessage(null);
+        }, 5000);
         setPersons([...persons, returnedPerson]);
         setNewName("");
         setNewNumber("");
@@ -62,9 +73,21 @@ function App() {
     if (personToDelete) {
       const confirmDelete = window.confirm(`Delete ${personToDelete.name} ?`);
       if (confirmDelete) {
-        personsService.remove(id).then(() => {
-          setPersons(persons.filter((person) => person.id !== id));
-        });
+        personsService
+          .remove(id)
+          .then(() => {
+            setPersons(persons.filter((person) => person.id !== id));
+          })
+          .catch(() => {
+            setMessage(
+              `Information of ${personToDelete.name} has already been removed from server`,
+            );
+            setMessageType("error");
+            setTimeout(() => {
+              setMessage(null);
+              setMessageType("success");
+            }, 5000);
+          });
       }
     }
   };
@@ -83,6 +106,7 @@ function App() {
     <div>
       <h1>Phonebook</h1>
 
+      <Notification message={message} type={messageType} />
       <Filter filterValue={filterValue} onFilterChange={handleFilterChange} />
 
       <h2>Add a new</h2>
