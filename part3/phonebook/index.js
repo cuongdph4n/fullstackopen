@@ -22,6 +22,7 @@ app.use(
     return log.join(" ");
   }),
 );
+app.use(express.static("dist"));
 
 let persons = [
   {
@@ -52,11 +53,7 @@ const generateId = () => {
   return String(maxId + 1);
 };
 
-app.get("/", (_, response) => {
-  response.send("<h1>Hello World!</h1>");
-});
-
-app.get("/info", (request, response) => {
+app.get("/info", (_, response) => {
   const info = `<p>Phonebook has info for ${persons.length} people</p><p>${new Date()}</p>`;
   response.send(info);
 });
@@ -109,7 +106,7 @@ app.delete("/api/persons/:id", (request, response) => {
   response.status(204).end();
 });
 
-const PORT = 3001;
+const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
