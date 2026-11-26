@@ -1,106 +1,120 @@
-import { useEffect, useState } from "react";
-import Filter from "./components/Filter";
-import Notification from "./components/Notification";
-import PersonForm from "./components/PersonForm";
-import Persons from "./components/Persons";
-import personsService from "./services/persons";
+import { useEffect, useState } from 'react'
+import Filter from './components/Filter'
+import Notification from './components/Notification'
+import PersonForm from './components/PersonForm'
+import Persons from './components/Persons'
+import personsService from './services/persons'
 
 function App() {
-  const [persons, setPersons] = useState([]);
-  const [newName, setNewName] = useState("");
-  const [newNumber, setNewNumber] = useState("");
-  const [filterValue, setFilterValue] = useState("");
-  const [message, setMessage] = useState(null);
-  const [messageType, setMessageType] = useState("success");
+  const [persons, setPersons] = useState([])
+  const [newName, setNewName] = useState('')
+  const [newNumber, setNewNumber] = useState('')
+  const [filterValue, setFilterValue] = useState('')
+  const [message, setMessage] = useState(null)
+  const [messageType, setMessageType] = useState('success')
 
   const handleNameChange = (event) => {
-    setNewName(event.target.value);
-  };
+    setNewName(event.target.value)
+  }
   const handleNumberChange = (event) => {
-    setNewNumber(event.target.value);
-  };
+    setNewNumber(event.target.value)
+  }
   const handleAddPerson = (event) => {
-    event.preventDefault();
-    const nameExists = persons.some((person) => person.name === newName);
+    event.preventDefault()
+    const nameExists = persons.some((person) => person.name === newName)
     if (nameExists) {
       const confirmEdit = window.confirm(
         `${newName} is already added to phonebook, replace the old number with a new one?`,
-      );
+      )
       if (confirmEdit) {
-        const personToUpdate = persons.find(
-          (person) => person.name === newName,
-        );
-        const updatedPerson = { ...personToUpdate, number: newNumber };
+        const personToUpdate = persons.find((person) => person.name === newName)
+        const updatedPerson = { ...personToUpdate, number: newNumber }
 
         personsService
           .update(personToUpdate.id, updatedPerson)
-          .then((returnedPerson) => {
-            setMessage(`Edit ${newName}'s number`);
+          .then((updatedPerson) => {
+            setMessage(`Edit ${newName}'s number`)
             setTimeout(() => {
-              setMessage(null);
-            }, 5000);
+              setMessage(null)
+            }, 5000)
             setPersons(
               persons.map((person) =>
-                person.id === personToUpdate.id ? returnedPerson : person,
+                person.id === personToUpdate.id ? updatedPerson : person,
               ),
-            );
-            setNewName("");
-            setNewNumber("");
-          });
+            )
+            setNewName('')
+            setNewNumber('')
+          })
+          .catch((error) => {
+            setMessage(error.response.data.error)
+            setMessageType('error')
+            setTimeout(() => {
+              setMessage(null)
+              setMessageType('success')
+            }, 5000)
+          })
       }
     } else {
       const newPerson = {
         name: newName,
         number: newNumber,
-      };
+      }
 
-      personsService.create(newPerson).then((returnedPerson) => {
-        setMessage(`Added ${newName}`);
-        setTimeout(() => {
-          setMessage(null);
-        }, 5000);
-        setPersons([...persons, returnedPerson]);
-        setNewName("");
-        setNewNumber("");
-      });
+      personsService
+        .create(newPerson)
+        .then((createdPerson) => {
+          setMessage(`Added ${newName}`)
+          setTimeout(() => {
+            setMessage(null)
+          }, 5000)
+          setPersons([...persons, createdPerson])
+          setNewName('')
+          setNewNumber('')
+        })
+        .catch((error) => {
+          setMessage(error.response.data.error)
+          setMessageType('error')
+          setTimeout(() => {
+            setMessage(null)
+            setMessageType('success')
+          }, 5000)
+        })
     }
-  };
+  }
   const handleFilterChange = (event) => {
-    setFilterValue(event.target.value);
-  };
+    setFilterValue(event.target.value)
+  }
   const handleDeletePerson = (id) => {
-    const personToDelete = persons.find((person) => person.id === id);
+    const personToDelete = persons.find((person) => person.id === id)
     if (personToDelete) {
-      const confirmDelete = window.confirm(`Delete ${personToDelete.name} ?`);
+      const confirmDelete = window.confirm(`Delete ${personToDelete.name} ?`)
       if (confirmDelete) {
         personsService
           .remove(id)
           .then(() => {
-            setPersons(persons.filter((person) => person.id !== id));
+            setPersons(persons.filter((person) => person.id !== id))
           })
-          .catch(() => {
-            setMessage(
-              `Information of ${personToDelete.name} has already been removed from server`,
-            );
-            setMessageType("error");
+          .catch((error) => {
+            setMessage(error.response.data.error)
+            setMessageType('error')
             setTimeout(() => {
-              setMessage(null);
-              setMessageType("success");
-            }, 5000);
-          });
+              setMessage(null)
+              setMessageType('success')
+            }, 5000)
+          })
       }
     }
-  };
+  }
 
   const filteredPersons = persons.filter((person) =>
-    person.name.toLowerCase().includes(filterValue?.toLowerCase() || ""),
-  );
+    person.name.toLowerCase().includes(filterValue?.toLowerCase().trim() || ''),
+  )
 
   useEffect(() => {
     personsService.getAll().then((initialPersons) => {
-      setPersons(initialPersons);
-    });
-  }, []);
+      setPersons(initialPersons)
+    })
+  }, [])
 
   return (
     <div>
@@ -126,7 +140,7 @@ function App() {
         onDeletePerson={handleDeletePerson}
       />
     </div>
-  );
+  )
 }
 
-export default App;
+export default App

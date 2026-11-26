@@ -9,7 +9,7 @@ Content-Type: application/json
 
 {
   "name": "Mr. Cuong",
-  "number": "123-456-7890"
+  "number": "1"
 }
 
 ###
