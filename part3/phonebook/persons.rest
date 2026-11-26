@@ -1,11 +1,23 @@
 GET http://localhost:3001/api/persons
 
 ###
+GET http://localhost:3001/api/persons/someInvalidId
+
+###
 POST http://localhost:3001/api/persons
 Content-Type: application/json
 
 {
-  "name": "cuongg",
+  "name": "Mr. Cuong",
+  "number": "123-456-7890"
+}
+
+###
+PUT  http://localhost:3001/api/persons/someInvalidId
+Content-Type: application/json
+
+{
+  "name": "Mr. Cuong",
   "number": "123-456-7890"
 }
 
